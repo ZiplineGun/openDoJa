@@ -260,8 +260,6 @@ public final class OpenDoJaLaunchArgs {
     public static final String SPEECH_TYPES = "opendoja.speechTypes";
     /** Mock speech voice-activity indicator. */
     public static final String SPEECH_VOICE_ACTIVITY = "opendoja.speechVoiceActivity";
-    /** Device name used for status-bar icons. */
-    public static final String STATUS_BAR_ICON_DEVICE = "opendoja.statusBarIconDevice";
     /** Reported sub-display height in pixels. */
     public static final String SUB_DISPLAY_HEIGHT = "opendoja.subDisplayHeight";
     /** Reported sub-display width in pixels. */
@@ -276,6 +274,11 @@ public final class OpenDoJaLaunchArgs {
     public static final String TRACE_FAILURES = "opendoja.traceFailures";
     /** Scale factor for UI 3D figure vertices. */
     public static final String UI_FIGURE_VERTEX_SCALE = "opendoja.uiFigureVertexScale";
+    /**
+     * UI skin id (folder name below {@code .opendoja/skin}, or {@code default}). When blank, the selection
+     * remembered from the launcher or the in-game menu is used.
+     */
+    public static final String UI_SKIN = "opendoja.uiSkin";
 
     private static final List<String> PROPERTIES = List.of(
             ACCELERATION_AVAILABLE_DATA,
@@ -396,7 +399,6 @@ public final class OpenDoJaLaunchArgs {
             SPEECH_SUPPORTED,
             SPEECH_TYPES,
             SPEECH_VOICE_ACTIVITY,
-            STATUS_BAR_ICON_DEVICE,
             SUB_DISPLAY_HEIGHT,
             SUB_DISPLAY_WIDTH,
             TEXT_ANTIALIAS,
@@ -404,6 +406,7 @@ public final class OpenDoJaLaunchArgs {
             TRACE_EVENTS,
             TRACE_FAILURES,
             UI_FIGURE_VERTEX_SCALE,
+            UI_SKIN,
             LAUNCH_COMPAT_APPLIED,
             VERIFY_FALLBACK_APPLIED);
 
@@ -685,7 +688,6 @@ public final class OpenDoJaLaunchArgs {
         defaults.put(SPEECH_SUPPORTED, () -> "true");
         defaults.put(SPEECH_TYPES, () -> "1");
         defaults.put(SPEECH_VOICE_ACTIVITY, () -> "1");
-        defaults.put(STATUS_BAR_ICON_DEVICE, () -> LaunchConfig.DEFAULT_STATUS_BAR_ICON_DEVICE);
         defaults.put(SUB_DISPLAY_HEIGHT, () -> "0");
         defaults.put(SUB_DISPLAY_WIDTH, () -> "0");
         defaults.put(TEXT_ANTIALIAS, () -> "gasp");
@@ -693,6 +695,7 @@ public final class OpenDoJaLaunchArgs {
         defaults.put(TRACE_EVENTS, () -> "false");
         defaults.put(TRACE_FAILURES, () -> "false");
         defaults.put(UI_FIGURE_VERTEX_SCALE, () -> "0.015625");
+        defaults.put(UI_SKIN, () -> "");
         LinkedHashSet<String> missingDefaults = new LinkedHashSet<>(PROPERTIES);
         missingDefaults.removeAll(defaults.keySet());
         if (!missingDefaults.isEmpty()) {

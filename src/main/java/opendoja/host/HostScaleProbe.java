@@ -1,5 +1,7 @@
 package opendoja.host;
 
+import opendoja.host.skin.UiSkinRepository;
+
 import java.awt.Dimension;
 import java.awt.Point;
 
@@ -22,16 +24,16 @@ public final class HostScaleProbe {
                 "fullscreen host scale should allow the host window to become resizable");
 
         ExternalFrameRenderer framedRenderer = new ExternalFrameRenderer(true,
-                LaunchConfig.DEFAULT_STATUS_BAR_ICON_DEVICE,
+                UiSkinRepository.load(UiSkinRepository.DEFAULT_ID),
                 LaunchConfig.IAppliType.I_APPLI);
         ExternalFrameLayout framed = framedRenderer.layoutFor(240, 320, 2.5d);
-        check(framed.preferredSize().equals(new Dimension(610, 895)),
+        check(framed.preferredSize().equals(new Dimension(610, 935)),
                 "framed fractional scale should preserve uniform proportions: " + framed.preferredSize());
         check(framed.drawArea().width == 240 && framed.drawArea().height == 320,
                 "framed draw area should stay in unscaled game pixels");
 
         ExternalFrameRenderer unframedRenderer = new ExternalFrameRenderer(false,
-                LaunchConfig.DEFAULT_STATUS_BAR_ICON_DEVICE,
+                UiSkinRepository.load(UiSkinRepository.DEFAULT_ID),
                 LaunchConfig.IAppliType.I_APPLI);
         ExternalFrameLayout unframed = unframedRenderer.layoutFor(240, 320, 2.5d);
         check(unframed.preferredSize().equals(new Dimension(600, 800)),

@@ -5,6 +5,8 @@ import opendoja.host.ExternalFrameLayout;
 import opendoja.host.ExternalFrameRenderer;
 import opendoja.host.JamLauncher;
 import opendoja.host.LaunchConfig;
+import opendoja.host.skin.UiSkin;
+import opendoja.host.skin.UiSkinRepository;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -20,19 +22,21 @@ public final class StatusBarIconProbe {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2 && args.length != 3) {
-            throw new IllegalArgumentException("Usage: StatusBarIconProbe <jam-path> <output-png> [normal|standby]");
+        if (args.length < 2 || args.length > 4) {
+            throw new IllegalArgumentException(
+                    "Usage: StatusBarIconProbe <jam-path> <output-png> [normal|standby] [skin-id]");
         }
         Path jamPath = Path.of(args[0]);
         Path outputPath = Path.of(args[1]);
-        LaunchConfig.LaunchTypeOption launchType = args.length == 3
+        LaunchConfig.LaunchTypeOption launchType = args.length >= 3
                 ? requireLaunchType(args[2])
                 : LaunchConfig.LaunchTypeOption.resolveConfigured();
         LaunchConfig config = JamLauncher.buildLaunchConfig(jamPath, false, launchType);
 
+        UiSkin skin = UiSkinRepository.load(args.length == 4 ? args[3] : UiSkinRepository.selectedId());
         ExternalFrameRenderer renderer = new ExternalFrameRenderer(
                 true,
-                config.statusBarIconDevice(),
+                skin,
                 config.iAppliType(),
                 config.launchType());
         ExternalFrameLayout layout = renderer.layoutFor(config.width(), config.height(), HOST_SCALE);
@@ -54,9 +58,9 @@ public final class StatusBarIconProbe {
         writeImage(image, outputPath);
         System.out.println("iAppliType=" + config.iAppliType());
         System.out.println("launchType=" + launchType.id);
-        System.out.println("iconDevice=" + config.statusBarIconDevice());
-        System.out.println("topBarNonBackgroundPixels=" + countTopBarNonBackgroundPixels(image));
-        System.out.println("topBarFingerprint=" + topBarFingerprint(image));
+        System.out.println("skin=" + skin.id());
+        System.out.println("topBarNonBackgroundPixels=" + countTopBarNonBackgroundPixels(image, skin));
+        System.out.println("topBarFingerprint=" + topBarFingerprint(image, skin.topBarHeight()));
         System.out.println("output=" + outputPath.toAbsolutePath());
     }
 
@@ -76,11 +80,13 @@ public final class StatusBarIconProbe {
         ImageIO.write(image, "png", outputPath.toFile());
     }
 
-    private static int countTopBarNonBackgroundPixels(BufferedImage image) {
+    private static int countTopBarNonBackgroundPixels(BufferedImage image, UiSkin skin) {
         int count = 0;
-        for (int y = 0; y < 18 && y < image.getHeight(); y++) {
+        int skinBackground = skin.backgroundArgb(UiSkin.Bar.TOP);
+        int barHeight = skin.topBarHeight();
+        for (int y = 0; y < barHeight && y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
-                if (image.getRGB(x, y) != 0xFFD7D8DB) {
+                if (image.getRGB(x, y) != skinBackground) {
                     count++;
                 }
             }
@@ -88,9 +94,9 @@ public final class StatusBarIconProbe {
         return count;
     }
 
-    private static String topBarFingerprint(BufferedImage image) {
+    private static String topBarFingerprint(BufferedImage image, int barHeight) {
         long hash = 0xcbf29ce484222325L;
-        for (int y = 0; y < 18 && y < image.getHeight(); y++) {
+        for (int y = 0; y < barHeight && y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 hash ^= image.getRGB(x, y);
                 hash *= 0x100000001b3L;

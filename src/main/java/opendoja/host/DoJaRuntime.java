@@ -10,6 +10,8 @@ import com.nttdocomo.ui.Graphics;
 import opendoja.host.input.ControllerInputEvent;
 import opendoja.host.input.ControllerInputListener;
 import opendoja.host.input.ControllerInputManager;
+import opendoja.host.skin.UiSkin;
+import opendoja.host.skin.UiSkinRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -107,7 +109,7 @@ public final class DoJaRuntime {
         this.hostScaleSetting = resolveHostScale(config);
         this.externalFrameRenderer = new ExternalFrameRenderer(
                 resolveExternalFrameEnabled(config),
-                config.statusBarIconDevice(),
+                UiSkinRepository.load(UiSkinRepository.selectedId()),
                 config.iAppliType(),
                 config.launchType());
         this.openGlesFpsOverlay = new OpenGlesFpsOverlay();
@@ -305,6 +307,36 @@ public final class DoJaRuntime {
                 repackWindow();
                 repaintWindow();
             });
+        }
+    }
+
+    /** Id of the skin currently used for the window chrome. */
+    public String uiSkinId() {
+        return externalFrameRenderer.skin().id();
+    }
+
+    /**
+     * Switches the window chrome to another skin and remembers the choice for the next launch. Unknown or broken
+     * skins fall back to the built-in one. The window is resized because bar heights are skin-defined.
+     */
+    public void setUiSkin(String id) {
+        UiSkin skin = UiSkinRepository.load(id);
+        // No "already selected" shortcut: choosing the current skin again reloads it from disk, which is
+        // handy while editing skin.ini.
+        externalFrameRenderer.setSkin(skin);
+        if (skin.id().equals(id)) {
+            UiSkinRepository.saveSelectedId(skin.id());
+        }
+        Runnable refresh = () -> {
+            applyHostWindowModeIfNeeded();
+            hostPanel.refreshPreferredSize();
+            repackWindow();
+            repaintWindow();
+        };
+        if (SwingUtilities.isEventDispatchThread()) {
+            refresh.run();
+        } else {
+            SwingUtilities.invokeLater(refresh);
         }
     }
 
@@ -1785,7 +1817,31 @@ public final class DoJaRuntime {
             fullscreenItem.setSelected(HostScale.isFullscreen(runtime.hostScaleSetting()));
             group.add(fullscreenItem);
             menu.add(fullscreenItem);
+            menu.addSeparator();
+            menu.add(buildUiSkinMenu());
             return menu;
+        }
+
+        private JMenu buildUiSkinMenu() {
+            JMenu skinMenu = new JMenu("UI Skin");
+            // The chrome only exists while the external frame is enabled, so a skin would have no visible effect.
+            skinMenu.setEnabled(runtime.externalFrameRenderer.enabled());
+            ButtonGroup skinGroup = new ButtonGroup();
+            String currentId = runtime.uiSkinId();
+            // Scanned on every open so skins dropped into the folder show up without restarting.
+            for (UiSkinRepository.Entry entry : UiSkinRepository.list()) {
+                JRadioButtonMenuItem item = new JRadioButtonMenuItem(new AbstractAction(entry.displayName()) {
+                    @Override
+                    public void actionPerformed(ActionEvent event) {
+                        runtime.setUiSkin(entry.id());
+                        HostPanel.this.requestFocusInWindow();
+                    }
+                });
+                item.setSelected(entry.id().equals(currentId));
+                skinGroup.add(item);
+                skinMenu.add(item);
+            }
+            return skinMenu;
         }
 
         private void refreshPreferredSize() {

@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 public final class LaunchConfig {
-    public static final String DEFAULT_STATUS_BAR_ICON_DEVICE = "n900i";
     public static final int DEFAULT_VIEWPORT_WIDTH = 240;
     public static final int DEFAULT_VIEWPORT_HEIGHT = 240;
 
@@ -21,7 +20,6 @@ public final class LaunchConfig {
     private final Path scratchpadRoot;
     private final Path scratchpadPackedFile;
     private final int[] scratchpadSizes;
-    private final String statusBarIconDevice;
     private final IAppliType iAppliType;
     private final boolean externalFrameEnabled;
     private final boolean exitOnShutdown;
@@ -38,7 +36,6 @@ public final class LaunchConfig {
         this.scratchpadRoot = builder.scratchpadRoot;
         this.scratchpadPackedFile = builder.scratchpadPackedFile;
         this.scratchpadSizes = builder.scratchpadSizes == null ? new int[0] : builder.scratchpadSizes.clone();
-        this.statusBarIconDevice = builder.statusBarIconDevice;
         this.iAppliType = builder.iAppliType;
         this.externalFrameEnabled = builder.externalFrameEnabled;
         this.exitOnShutdown = builder.exitOnShutdown;
@@ -92,10 +89,6 @@ public final class LaunchConfig {
         return scratchpadSizes.clone();
     }
 
-    public String statusBarIconDevice() {
-        return statusBarIconDevice;
-    }
-
     public IAppliType iAppliType() {
         return iAppliType;
     }
@@ -120,7 +113,6 @@ public final class LaunchConfig {
         private Path scratchpadRoot;
         private Path scratchpadPackedFile;
         private int[] scratchpadSizes = new int[0];
-        private String statusBarIconDevice = resolveDefaultStatusBarIconDevice();
         private IAppliType iAppliType = IAppliType.I_APPLI;
         private boolean externalFrameEnabled = true;
         private boolean exitOnShutdown;
@@ -182,15 +174,6 @@ public final class LaunchConfig {
             return this;
         }
 
-        public Builder statusBarIconDevice(String statusBarIconDevice) {
-            if (statusBarIconDevice == null || statusBarIconDevice.isBlank()) {
-                this.statusBarIconDevice = DEFAULT_STATUS_BAR_ICON_DEVICE;
-                return this;
-            }
-            this.statusBarIconDevice = statusBarIconDevice.trim();
-            return this;
-        }
-
         public Builder iAppliType(IAppliType iAppliType) {
             this.iAppliType = iAppliType == null ? IAppliType.I_APPLI : iAppliType;
             return this;
@@ -215,14 +198,6 @@ public final class LaunchConfig {
         Map<String, String> copy = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         copy.putAll(source);
         return copy;
-    }
-
-    private static String resolveDefaultStatusBarIconDevice() {
-        String raw = OpenDoJaLaunchArgs.get(OpenDoJaLaunchArgs.STATUS_BAR_ICON_DEVICE, null);
-        if (raw == null || raw.isBlank()) {
-            return DEFAULT_STATUS_BAR_ICON_DEVICE;
-        }
-        return raw.trim();
     }
 
     // Nested host-config enums start here. Keep them with LaunchConfig so the

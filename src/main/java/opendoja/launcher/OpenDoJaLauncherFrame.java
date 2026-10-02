@@ -7,8 +7,11 @@ import opendoja.host.LaunchConfig;
 import opendoja.host.OpenDoJaLaunchArgs;
 import opendoja.host.OpenDoJaLog;
 import opendoja.host.OpenGlesRendererMode;
+import opendoja.host.skin.UiSkinRepository;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -76,6 +79,12 @@ final class OpenDoJaLauncherFrame extends JFrame {
                 openSdCardFolder();
             }
         }));
+        fileMenu.add(new JMenuItem(new AbstractAction("Open Skin Folder") {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                openSkinFolder();
+            }
+        }));
         fileMenu.addSeparator();
         fileMenu.add(new JMenuItem(new AbstractAction("Exit") {
             @Override
@@ -89,6 +98,7 @@ final class OpenDoJaLauncherFrame extends JFrame {
         settingsMenu.add(buildDisplayRotationMenu());
         settingsMenu.add(buildSynthMenu());
         settingsMenu.add(buildFontTypeMenu());
+        settingsMenu.add(buildUiSkinMenu());
         settingsMenu.add(buildLaunchTypeMenu());
         settingsMenu.add(buildExperimentalMenu());
         settingsMenu.addSeparator();
@@ -208,6 +218,18 @@ final class OpenDoJaLauncherFrame extends JFrame {
     private void openSdCardFolder() {
         try {
             FolderOpenSupport.openDirectory(JamLaunchService.ensureSdCardFolder());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    e.getMessage(),
+                    OpenDoJaLauncher.APP_NAME,
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openSkinFolder() {
+        try {
+            FolderOpenSupport.openDirectory(UiSkinRepository.skinRoot());
         } catch (IOException e) {
             JOptionPane.showMessageDialog(
                     this,
@@ -381,6 +403,43 @@ final class OpenDoJaLauncherFrame extends JFrame {
         group.add(fullscreenItem);
         hostScaleMenu.add(fullscreenItem);
         return hostScaleMenu;
+    }
+
+    private JMenu buildUiSkinMenu() {
+        JMenu skinMenu = new JMenu("UI Skin");
+        Runnable populate = () -> {
+            skinMenu.removeAll();
+            ButtonGroup group = new ButtonGroup();
+            String selectedId = UiSkinRepository.selectedId();
+            for (UiSkinRepository.Entry entry : UiSkinRepository.list()) {
+                JRadioButtonMenuItem item = new JRadioButtonMenuItem(new AbstractAction(entry.displayName()) {
+                    @Override
+                    public void actionPerformed(ActionEvent event) {
+                        UiSkinRepository.saveSelectedId(entry.id());
+                    }
+                });
+                item.setSelected(entry.id().equals(selectedId));
+                group.add(item);
+                skinMenu.add(item);
+            }
+        };
+        populate.run();
+        // Repopulated each time the menu opens so skins added to the folder appear without restarting the launcher.
+        skinMenu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent event) {
+                populate.run();
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent event) {
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent event) {
+            }
+        });
+        return skinMenu;
     }
 
     private JMenu buildFontTypeMenu() {
