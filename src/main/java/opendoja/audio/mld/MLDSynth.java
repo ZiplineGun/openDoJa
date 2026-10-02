@@ -2,6 +2,7 @@ package opendoja.audio.mld;
 
 import opendoja.audio.mld.fuetrek.FueTrekSamplerProvider;
 import opendoja.audio.mld.ma3.MA3SamplerProvider;
+import opendoja.audio.mld.ma7.MA7SamplerProvider;
 import opendoja.host.DoJaRuntime;
 import opendoja.host.LaunchConfig;
 import opendoja.host.OpenDoJaLaunchArgs;
@@ -23,6 +24,15 @@ public enum MLDSynth {
                     MA3SamplerProvider.FM_MA3_4OP,
                     MA3SamplerProvider.FM_MA3_4OP,
                     MA3SamplerProvider.WAVE_DRUM_MA3);
+        }
+    },
+    /**
+     * Yamaha MA-7 emulator DLLs, hosted in a 32-bit helper process.
+     */
+    MA7("ma7", MA7SamplerProvider.SAMPLE_RATE, 1024) {
+        @Override
+        public SamplerProvider createSamplerProvider() {
+            return new MA7SamplerProvider();
         }
     };
 

@@ -589,6 +589,7 @@ final class OpenDoJaLauncherFrame extends JFrame {
         return switch (synth) {
             case FUETREK -> "FueTrek";
             case MA3 -> "MA3";
+            case MA7 -> "MA-7 DLL";
         };
     }
 

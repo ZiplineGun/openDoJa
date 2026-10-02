@@ -3,6 +3,7 @@ package opendoja.audio.mld;
 import com.nttdocomo.ui.MediaManager;
 import opendoja.audio.mld.fuetrek.FueTrekSamplerProvider;
 import opendoja.audio.mld.ma3.MA3SamplerProvider;
+import opendoja.audio.mld.ma7.MA7SamplerProvider;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -104,6 +105,11 @@ public final class MLDPCMPlayer implements AutoCloseable {
                     MLDSynth.MA3,
                     MA3_SAMPLER_PROVIDER,
                     MA3SamplerProvider.SAMPLE_RATE,
+                    1024);
+            case MA7 -> new SynthProfile(
+                    MLDSynth.MA7,
+                    new MA7SamplerProvider(),
+                    MA7SamplerProvider.SAMPLE_RATE,
                     1024);
         };
     }

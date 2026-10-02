@@ -237,6 +237,11 @@ public class MLD
      */
     byte[] ainf;
 
+    /**
+     * Original encoded bytes (byte[] constructors only)
+     */
+    private final byte[] rawData;
+
     int ainfCount;
 
     boolean ainfRejectExternalLink;
@@ -359,6 +364,10 @@ public class MLD
                 "Invalid range in byte buffer.");
         }
 
+        // Native synth backends (e.g. the Yamaha MA-7 DLLs) sequence the file
+        // themselves and need the untouched original bytes.
+        this.rawData = Arrays.copyOfRange(data, offset, offset + length);
+
         // Parse the data
         try (ByteArrayInputStream stream = new ByteArrayInputStream(data,
             offset, length))
@@ -386,10 +395,22 @@ public class MLD
     public MLD(InputStream in)
         throws IOException
     {
+        this.rawData = null;
         this.parse(in instanceof DataInputStream ? (DataInputStream)in :
             new DataInputStream(in));
     }
 
+
+    /**
+     * The original encoded bytes this MLD was decoded from.
+     *
+     * @return A copy of the source bytes, or {@code null} if the MLD was
+     * decoded from a stream and the original bytes were not retained.
+     */
+    public byte[] getRawData()
+    {
+        return this.rawData == null ? null : this.rawData.clone();
+    }
 
     /**
      * Retrieve the copyright of the MLD resource.

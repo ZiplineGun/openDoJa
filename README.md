@@ -44,11 +44,14 @@ Launch a JAM directly without the launcher UI, with explicit host scale, synth, 
 ```bash
 java \
   -Dopendoja.hostScale=<x|fullscreen> \
-  -Dopendoja.mldSynth=<fuetrek|ma3> \
+  -Dopendoja.mldSynth=<fuetrek|ma3|ma7> \
   -Dopendoja.userId=<uid> \
   -Dopendoja.terminalId=<tid> \
   -jar opendoja-{version}.jar --run-jam <game.jam>
 ```
+
+`ma7` plays MLD through the real Yamaha MA-7 DLLs (Windows only, DLLs not included);
+see [MA7_SYNTH.md](MA7_SYNTH.md) for the setup.
 
 Print all available launcher options:
 

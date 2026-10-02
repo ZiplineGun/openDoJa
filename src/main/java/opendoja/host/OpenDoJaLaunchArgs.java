@@ -1,6 +1,7 @@
 package opendoja.host;
 
 import opendoja.audio.mld.MLDSynth;
+import opendoja.audio.mld.ma7.MA7SamplerProvider;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -47,6 +48,12 @@ public final class OpenDoJaLaunchArgs {
     public static final String BLUETOOTH_SELECTION_INDEX = "opendoja.bluetoothSelectionIndex";
     /** Whether Bluetooth APIs are exposed. */
     public static final String BLUETOOTH_SUPPORTED = "opendoja.bluetoothSupported";
+    /**
+     * Overrides the folder that holds the per-synth bridge folders ({@code <root>/ma7/bridge.ini}, ...).
+     * Defaults to {@code .opendoja/bridge} next to the runtime artifact; mainly useful when running from a
+     * build directory that gets cleaned.
+     */
+    public static final String BRIDGE_ROOT = "opendoja.bridgeRoot";
     /** Maximum movie size reported by the camera. */
     public static final String CAMERA_MAX_MOVIE_LENGTH = "opendoja.camera.maxMovieLength";
     /** Whether software 3D clips against screen planes. */
@@ -184,6 +191,12 @@ public final class OpenDoJaLaunchArgs {
     public static final String MLD_SAMPLE_RATE = "opendoja.mldSampleRate";
     /** MLD synth backend to use. */
     public static final String MLD_SYNTH = "opendoja.mldSynth";
+    /** Folder holding the Yamaha MA-7 DLLs; overrides {@code dll_dir} in {@code .opendoja/bridge/ma7/bridge.ini}. */
+    public static final String MA7_DLL_DIR = "opendoja.ma7DllDir";
+    /** Path to a 32-bit {@code ma7_helper.exe}; overrides {@code helper} in {@code bridge.ini}. */
+    public static final String MA7_HELPER = "opendoja.ma7Helper";
+    /** Yamaha MA-7 master volume (0-127); overrides {@code volume} in {@code bridge.ini}. */
+    public static final String MA7_VOLUME = "opendoja.ma7Volume";
     /** Owner profile email address. */
     public static final String OWNER_EMAIL1 = "opendoja.owner.email1";
     /** Owner profile phone number. */
@@ -296,6 +309,7 @@ public final class OpenDoJaLaunchArgs {
             BLUETOOTH_SEARCH_SELECTION_INDEX,
             BLUETOOTH_SELECTION_INDEX,
             BLUETOOTH_SUPPORTED,
+            BRIDGE_ROOT,
             CAMERA_MAX_MOVIE_LENGTH,
             CLIP_SCREEN_PLANES,
             COMPASS_AZIMUTH,
@@ -358,6 +372,9 @@ public final class OpenDoJaLaunchArgs {
             MLD_LINE_BUFFER_FRAMES,
             MLD_SAMPLE_RATE,
             MLD_SYNTH,
+            MA7_DLL_DIR,
+            MA7_HELPER,
+            MA7_VOLUME,
             OWNER_EMAIL1,
             OWNER_PHONE1,
             PEDOMETER_DEFAULT_HEIGHT_MM,
@@ -583,6 +600,7 @@ public final class OpenDoJaLaunchArgs {
         defaults.put(BLUETOOTH_SEARCH_SELECTION_INDEX, () -> "0");
         defaults.put(BLUETOOTH_SELECTION_INDEX, () -> "0");
         defaults.put(BLUETOOTH_SUPPORTED, () -> "true");
+        defaults.put(BRIDGE_ROOT, () -> "");
         defaults.put(CAMERA_MAX_MOVIE_LENGTH, () -> "1048576");
         defaults.put(CLIP_SCREEN_PLANES, () -> "false");
         defaults.put(COMPASS_AZIMUTH, () -> "0.0");
@@ -647,6 +665,9 @@ public final class OpenDoJaLaunchArgs {
         defaults.put(MLD_LINE_BUFFER_FRAMES, () -> Integer.toString(getInt(MLD_BUFFER_FRAMES) * 4));
         defaults.put(MLD_SAMPLE_RATE, () -> Float.toString(MLDSynth.resolveConfigured().defaultSampleRate));
         defaults.put(MLD_SYNTH, () -> MLDSynth.DEFAULT.id);
+        defaults.put(MA7_DLL_DIR, () -> "");
+        defaults.put(MA7_HELPER, () -> "");
+        defaults.put(MA7_VOLUME, () -> Integer.toString(MA7SamplerProvider.DEFAULT_VOLUME));
         defaults.put(OWNER_EMAIL1, () -> "");
         defaults.put(OWNER_PHONE1, () -> "");
         defaults.put(PEDOMETER_DEFAULT_HEIGHT_MM, () -> "1700");

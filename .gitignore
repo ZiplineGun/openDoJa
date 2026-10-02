@@ -19,6 +19,9 @@ out/
 
 # Project-local runtime state
 .opendoja/
+
+# Native helper build leftovers (the bundled copy under src/main/resources is tracked)
+/native/**/*.exe
 .codex
 
 # Reverse-engineering inputs and local task logs
